@@ -17,6 +17,7 @@ def drop_columns(df):
         "Latitude",
         "Longitude",
         "Churn Label",
+        "Churn Score",
         "Country",
         "State",
         "Count"
@@ -66,13 +67,14 @@ def preprocess_data(df):
 
     df = drop_columns(df)
     print("After drop:", df.shape)
-
+    print(df.columns)
     df = encode_features(df)
     print("After encoding:", df.shape)
     return df
 
 
 df = load_data(r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\raw_data\Telco_customer_churn.csv")
+print(df.columns)
 df = preprocess_data(df)
 output_path = r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\preprocessed_data\churn_processed.csv"
 
