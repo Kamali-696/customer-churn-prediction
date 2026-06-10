@@ -57,7 +57,7 @@ def encode_features(df):
         'Payment Method'
     ]
     
-    df = pd.get_dummies(data=df,columns=remaining_columns,drop_first=True)
+    df = pd.get_dummies(data=df,columns=remaining_columns)
 
     return df
 
@@ -73,13 +73,15 @@ def preprocess_data(df):
     return df
 
 
-df = load_data(r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\raw_data\Telco_customer_churn.csv")
-print(df.columns)
-df = preprocess_data(df)
-output_path = r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\preprocessed_data\churn_processed.csv"
+if __name__ == "__main__":
+    df = load_data(r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\raw_data\Telco_customer_churn.csv")
 
-df.to_csv(output_path, index=False)
+    df = preprocess_data(df)
 
-print(f"Processed dataset saved to: {output_path}")
+    output_path = r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\preprocessed_data\churn_processed.csv"
+
+    df.to_csv(output_path, index=False)
+
+    print(f"Processed dataset saved to: {output_path}")
 
 
