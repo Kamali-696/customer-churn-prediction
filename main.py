@@ -5,6 +5,7 @@ import pandas as pd
 
 X_train,X_test,y_train,y_test = split_and_load_data(r"D:\ML_LEARNING\PROJECTS\customer-churn-prediction\data\preprocessed_data\churn_processed.csv")
 
+save_model(X_train.columns.to_list(),"models/feature_columns.pkl")
 # Baseline models:
 
 # print("\n===== Logistic Regression =====")
@@ -58,29 +59,4 @@ evaluate_model(
 #save the model as .pkl file
 
 save_model(best_lr,"models/churn_model.pkl")
-
-# Checking the feature importance of the features for model interpretation and EDA comparision
-
-lr_model = best_lr.named_steps["model"]
-
-coef = lr_model.coef_[0]
-
-importance_df = pd.DataFrame({
-    "Feature": X_train.columns,
-    "Coefficient": coef
-})
-
-importance_df = importance_df.sort_values(
-    by="Coefficient",
-    ascending=False
-)
-
-# higher the values - more likely to be churned
-print(importance_df.head(10))
-
-print()
-print()
-
-# higher the values - less likely to be churned
-print(importance_df.tail(10))
 
