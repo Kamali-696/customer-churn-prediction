@@ -4,22 +4,26 @@ import joblib
 import pandas as pd
 from src.utils import load_model
 from src.preprocess import preprocess_data
-app = FastAPI()
+from enum import Enum
+
+app = FastAPI(title="Customer Churn Prediction API", description="Predict whether a telecom customer is likely to churn.", version="1.0.0")
 
 # Load model once at startup
 model = load_model("models/churn_model.pkl")
 feature_columns = load_model("models/feature_columns.pkl")
-print(type(feature_columns))
-print(feature_columns)
+
+class GenderEnum(str,Enum):
+    male = "Male"
+    female = "Female"
 class CustomerData(BaseModel):
-    Gender : str
+    Gender : GenderEnum
     Senior_Citizen : str
     Partner : str
     Dependents : str
-    Tenure_Months : int = Field(...,ge=0)
+    Tenure_Months : int = Field(...,ge=0,le=72)
     Phone_Service : str
     Paperless_Billing : str
-    Monthly_Charges : int = Field(...,ge=0)
+    Monthly_Charges : int = Field(...,ge=0,le=2000)
     Total_Charges : int = Field(...,ge=0)
     CLTV : int = Field(...,ge=0)
     Multiple_Lines : str
@@ -37,8 +41,19 @@ class CustomerData(BaseModel):
 def home():
     return {"message": "Customer Churn Prediction API"}
 
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy"
+    }
 
-@app.post("/predict")
+class PredictionResponse(BaseModel):
+    prediction: int
+    churn_probability: float
+    risk_level: str
+
+@app.post("/predict",response_model=PredictionResponse)
+
 def predict(customer: CustomerData):
 
     data = pd.DataFrame([{
@@ -64,25 +79,28 @@ def predict(customer: CustomerData):
         "Payment Method": customer.Payment_Method,
     }])
 
-
-    print("Before preprocessing")
-    print(data.head())
-
     preprocessed_data = preprocess_data(data)
-
-    print("After preprocessing")
-    print(preprocessed_data.head())
 
     processed_data = preprocessed_data.reindex(
         columns=feature_columns,
         fill_value=0
     )
     
-    print(processed_data.T)
     prediction = model.predict(processed_data)[0]
+
     probability = model.predict_proba(processed_data)[0][1]
+
+    if probability>=0.8: 
+        risk = "High Risk"
+    elif probability >= 0.5:
+        risk = "Medium Risk"
+    else:
+        risk = "Low Risk"
+    
+
     print("Final shape:", processed_data.shape)
     return {
         "prediction": int(prediction),
-        "churn_probability": round(float(probability), 4)
+        "churn_probability": round(float(probability), 4),
+        "risk_level" : risk
     }
